@@ -5,3 +5,6 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+exported.xlsx
+.playwright-mcp/page-2025-09-03T15-07-15-460Z.png
+.playwright-mcp/page-2025-09-03T15-09-51-090Z.png

@@ -1,15 +1,10 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 import { AgGridPage } from '../../components/ag-grid.page';
 import { NavBar } from '../../components/nav-bar.page';
-import { ActionsBar, ActionsBarButton } from '../../components/actions-bar.page';
+import { ActionsBar } from '../../components/actions-bar.page';
+import { ActionsBarButton } from '../../components/actions-bar.page';
 
-export class TransitGridPage {
-  /** Year selector combobox */
-  readonly yearSelector: Locator;
-  /**
-   * Finds a cell by column header and transit ID value.
-   * Returns the cell Locator or throws if not found.
-   */
+export class LocationGridPage {
   readonly page: Page;
   readonly heading: Locator;
   readonly table: Locator;
@@ -21,32 +16,50 @@ export class TransitGridPage {
   readonly actionsBar: ActionsBar;
   readonly grid: AgGridPage;
   readonly paginationText: Locator;
+  readonly clearFiltersButton: Locator;
+  readonly exportToExcelButton: Locator;
+  readonly createNewLocationButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.heading = page.getByRole('heading', { name: /Transits/i });
+    this.heading = page.getByRole('heading', { name: /Locations/i });
     this.table = page.getByRole('treegrid');
     this.rows = this.table.getByRole('row');
     this.pageSizeCombo = page.getByRole('combobox', { name: /Page Size/i });
-    this.yearSelector = page.getByRole('combobox', { name: /Select Year/i });
     this.nextPageButton = page.getByRole('button', { name: /Next Page/i });
     this.lastPageButton = page.getByRole('button', { name: /Last Page/i });
     this.navBar = new NavBar(page);
     this.actionsBar = new ActionsBar(page);
     this.grid = new AgGridPage(page);
-    // Using more specific locator for pagination text
-    this.paginationText = page.locator('text=/\\d+ to \\d+ of \\d+/');
+    this.paginationText = page.locator('text=/\d+ to \d+ of \d+/');
+    this.clearFiltersButton = page.getByRole('button', { name: 'Clear Filters' });
+    this.exportToExcelButton = page.getByRole('button', { name: 'Export to Excel' });
+    this.createNewLocationButton = page.getByRole('button', { name: 'Create New Location' });
   }
 
-  /** Select a year in the year selector combobox */
-  async selectYear(year: string) {
-  await this.yearSelector.click();
-  await this.page.getByRole('option', { name: year }).click();
+  getColumnHeader(name: string) {
+    return this.page.getByRole('columnheader', { name });
   }
 
-  async startCreateTransit() {
+  getRow(index: number) {
+    return this.rows.nth(index);
+  }
+
+  getCell(rowIndex: number, columnName: string) {
+    return this.getRow(rowIndex).getByRole('gridcell', { name: columnName });
+  }
+
+  async goToNextPage() {
+    await this.nextPageButton.click();
+  }
+
+  async goToLastPage() {
+    await this.lastPageButton.click();
+  }
+
+  async startCreateLocation() {
     await this.actionsBar.clickButton(ActionsBarButton.CreateNew);
-    // Add logic to handle the transit creation dialog/form
+    // Add logic to handle the location creation dialog/form
   }
 
   async clearFilters() {
@@ -54,8 +67,8 @@ export class TransitGridPage {
   }
 
   /**
-   * Gets the total number of transits from the heading text
-   * Example: "Transits (512)" returns 512
+   * Gets the total number of locations from the heading text
+   * Example: "Locations (474)" returns 474
    */
   async getTotalCountFromHeading(): Promise<number> {
     const headingText = await this.heading.innerText();
@@ -67,24 +80,25 @@ export class TransitGridPage {
   }
 
   /**
-   * Gets the total number of transits from the pagination text
-   * Example: "1 to 100 of 512" returns 512
+   * Gets the total number of locations from the pagination text
+   * Example: "1 to 100 of 474" returns 474
    */
   async getTotalCountFromPagination(): Promise<number> {
-    // Wait for the pagination text to be visible
-    await this.paginationText.waitFor({ state: 'visible', timeout: 10000 });
-    const paginationText = await this.paginationText.innerText();
+    // Look for the pagination text at the bottom of the grid
+    // This text typically appears as "1 to 17 of 474" above pagination controls
+    
+    // Use a more specific locator based on the known pattern
+    const paginationLocator = this.page.locator('text=/\\d+ to \\d+ of \\d+/').last();
+    
+    // Wait for the pagination text to be visible with a longer timeout
+    await paginationLocator.waitFor({ state: 'visible', timeout: 15000 });
+    
+    // Get the full text that contains pagination info
+    const paginationText = await paginationLocator.innerText();
     console.log(`Raw pagination text: "${paginationText}"`);
     
-    // Try multiple regex patterns to handle different formats
-    let match = paginationText.match(/of (\d+)/);
-    if (!match) {
-      match = paginationText.match(/(\d+)\s*\.\s*Page/);
-    }
-    if (!match) {
-      match = paginationText.match(/\d+\s+to\s+\d+\s+of\s+(\d+)/);
-    }
-    
+    // Extract the total count using regex
+    const match = paginationText.match(/of (\d+)/);
     if (match && match[1]) {
       return parseInt(match[1], 10);
     }
@@ -104,7 +118,7 @@ export class TransitGridPage {
   }
 
   /**
-   * Gets the total count of all transits from the heading (unfiltered)
+   * Gets the total count of all locations from the heading (unfiltered)
    * This shows the total count in the database regardless of filtering
    */
   async getTotalCount(): Promise<number> {
@@ -123,7 +137,7 @@ export class TransitGridPage {
   }
   
   /**
-   * Gets the filtered count of transits from the pagination text
+   * Gets the filtered count of locations from the pagination text
    * This reflects the current filtered state of the grid
    */
   async getFilteredCount(): Promise<number> {
@@ -136,26 +150,14 @@ export class TransitGridPage {
     }
   }
 
-  async exportToExcel() {
-    await this.actionsBar.clickButton(ActionsBarButton.ExportToExcel);
+  getLocationEditor() {
+    // Assumes the location creation dialog is open and visible
+    const { LocationEditor } = require('./location-editor.page');
+    return new LocationEditor(this.page);
   }
 
-  async goToNextPage() {
-    await this.nextPageButton.click();
-  }
-
-  async goToLastPage() {
-    await this.lastPageButton.click();
-  }
-
-  getTransitEditor() {
-    // Assumes the transit creation dialog is open and visible
-    const { TransitEditor } = require('./transit-editor.page');
-    return new TransitEditor(this.page);
-  }
-
-  async saveTransit() {
-    // Assumes the Save button is visible in the transit creation dialog
+  async saveLocation() {
+    // Assumes the Save button is visible in the location creation dialog
     // Click the first enabled Save button
     const saveButtons = await this.page.locator('button', { hasText: 'Save' }).filter({ has: this.page.locator(':not([disabled])') });
     const count = await saveButtons.count();
@@ -167,21 +169,21 @@ export class TransitGridPage {
     }
   }
 
-  async getCellByHeaderAndTransitId(header: string, transitId: string): Promise<Locator> {
-    // Find the row index for the given transitId
-    const colIndex = await this.grid.getColumnIndex('Transit ID');
+  async getCellByHeaderAndLocationId(header: string, locationId: string): Promise<Locator> {
+    // Find the row index for the given locationId
+    const colIndex = await this.grid.getColumnIndex('Location ID');
     const rows = this.table.getByRole('row');
     const rowCount = await rows.count();
     let targetRowIndex = -1;
     for (let i = 1; i < rowCount; i++) { // skip header row
       const cell = rows.nth(i).getByRole('gridcell').nth(colIndex);
       const text = await cell.innerText();
-      if (text.trim() === transitId) {
+      if (text.trim() === locationId) {
         targetRowIndex = i;
         break;
       }
     }
-    if (targetRowIndex === -1) throw new Error(`Transit ID ${transitId} not found.`);
+    if (targetRowIndex === -1) throw new Error(`Location ID ${locationId} not found.`);
     // Find the column index for the target header
     const targetColIndex = await this.grid.getColumnIndex(header);
     const targetRow = rows.nth(targetRowIndex);

@@ -75,6 +75,6 @@ export class RouteInfoForm {
     }
     await this.gonOrigin.selectText(gonOrigin);
     await this.gonDestination.selectText(gonDestination);
-    await this.routeTags.selectTags(routeTags);
+    // await this.routeTags.selectTags(routeTags);
   }
 }

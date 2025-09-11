@@ -19,6 +19,14 @@ export class AgGridPage {
   async getRowCount(): Promise<number> {
     return await this.grid.getByRole('row').count();
   }
+  
+  /**
+   * Checks if the grid is currently visible on the page
+   * @returns True if the grid is visible, false otherwise
+   */
+  async isVisible(): Promise<boolean> {
+    return await this.grid.isVisible().catch(() => false);
+  }
 
   async getColumnCount(): Promise<number> {
     return await this.grid.getByRole('columnheader').count();
@@ -240,12 +248,17 @@ export class AgGridPage {
       throw new Error(`Column header "${header}" not found.`);
     }
     
-    // Click on the filter button in the header
-    const filterButton = headerCell.locator('[role="button"]').first();
-    await filterButton.click();
+  // Click on the filter button in the header
+  // Use data-ref="eFilterButton" which is the filter button's attribute
+  const filterButton = headerCell.locator('[data-ref="eFilterButton"]');
+  await filterButton.click();
     
-    // Enter filter value in the filter input
-    const filterInput = this.page.getByPlaceholder('Filter...');
+    // Wait briefly for the filter panel to appear
+    await this.page.waitForTimeout(500);
+    
+    // Enter filter value in the first filter input
+    // Use first() to handle cases where multiple filter inputs may be present
+    const filterInput = this.page.getByPlaceholder('Filter...').first();
     await filterInput.fill(filterValue);
     
     // Press Enter to apply the filter
@@ -357,26 +370,61 @@ export class AgGridPage {
   /**
    * Wait for the grid to load or update
    */
-  async waitForGridToLoad(): Promise<void> {
-    // Wait for loading indicator to disappear if present
+  // async waitForGridToLoad(): Promise<void> {
+  //   // Wait for loading indicator to disappear if present
+  //   const loadingIndicator = this.page.getByRole('progressbar').first();
+  //   try {
+  //     await loadingIndicator.waitFor({ state: 'hidden', timeout: 10000 });
+  //   } catch (error) {
+  //     // If timeout or element not found, continue - it means there was no loading indicator
+  //   }
+    
+  //   // Make sure the grid is present
+  //   await this.grid.waitFor({ state: 'visible', timeout: 5000 });
+    
+  //   // Wait for at least one row or "No Rows To Show" message
+  //   try {
+  //     await this.page.waitForSelector(
+  //       'div[role="treegrid"] div[role="row"], div[role="treegrid"] div:text-is("No Rows To Show")', 
+  //       { timeout: 5000 }
+  //     );
+  //   } catch (error) {
+  //     console.warn('Timed out waiting for grid rows or "No Rows To Show" message');
+  //   }
+  // }
+
+  // grok version
+  async waitForGridToLoad(options: { loadingTimeout?: number; gridTimeout?: number; rowsTimeout?: number } = {}): Promise<{ isEmpty: boolean }> {
+    const { loadingTimeout = 10000, gridTimeout = 5000, rowsTimeout = 5000 } = options;
+
+    if (!this.page || !this.grid) {
+      throw new Error('Page or grid locator not initialized.');
+    }
+
+    // Wait for loading indicator to disappear
     const loadingIndicator = this.page.getByRole('progressbar').first();
     try {
-      await loadingIndicator.waitFor({ state: 'hidden', timeout: 10000 });
+      await loadingIndicator.waitFor({ state: 'hidden', timeout: loadingTimeout });
     } catch (error) {
-      // If timeout or element not found, continue - it means there was no loading indicator
+      if (error.name !== 'TimeoutError' && !error.message.includes('Locator expected to be hidden')) {
+        console.warn('Unexpected error while waiting for loading indicator:', error.message);
+      }
     }
-    
-    // Make sure the grid is present
-    await this.grid.waitFor({ state: 'visible', timeout: 5000 });
-    
-    // Wait for at least one row or "No Rows To Show" message
+
+    // Ensure grid is visible
+    await this.grid.waitFor({ state: 'visible', timeout: gridTimeout });
+
+    // Wait for rows or "No Rows To Show"
+    const GRID_ROW_SELECTOR = 'div[role="treegrid"] div[role="row"]';
+    const NO_ROWS_SELECTOR = 'div[role="treegrid"] div:text-is("No Rows To Show")';
     try {
-      await this.page.waitForSelector(
-        'div[role="treegrid"] div[role="row"], div[role="treegrid"] div:text-is("No Rows To Show")', 
-        { timeout: 5000 }
-      );
+      const element = await this.page.waitForSelector(`${GRID_ROW_SELECTOR}, ${NO_ROWS_SELECTOR}`, { timeout: rowsTimeout });
+      const isEmpty = await element.evaluate(el => el.textContent === 'No Rows To Show');
+      console.log(`Grid loaded ${isEmpty ? 'with no rows' : 'with rows'}.`);
+      return { isEmpty };
     } catch (error) {
-      console.warn('Timed out waiting for grid rows or "No Rows To Show" message');
+      console.warn('Timed out waiting for grid rows or "No Rows To Show" message:', error.message);
+      return { isEmpty: false };
     }
   }
 }

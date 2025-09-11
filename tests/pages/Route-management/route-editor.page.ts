@@ -21,21 +21,41 @@ export class RouteEditor {
     this.nextButton = page.getByRole('button', { name: 'Next' });
   }
 
-  async fillRoute({ routeInfo, thresholds, segment }: {
+  async fillRoute({ routeInfo, thresholds, segments, totalExpectedDuration, totalExpectedDurationUnit }: {
     routeInfo: Parameters<RouteInfoForm['fillRouteInfo']>[0];
     thresholds: Parameters<ThresholdsForm['fillThresholds']>[0];
-    segment: Parameters<SegmentsForm['fillSegment']>[0];
+    segments: Parameters<SegmentsForm['fillSegment']>[0][];
+    totalExpectedDuration?: number;
+    totalExpectedDurationUnit?: string;
   }) {
     await this.stepper.goToStepByLabel('Route Info');
     await this.routeInfoForm.fillRouteInfo(routeInfo);
     await this.nextButton.click();
 
-    // await this.stepper.goToStepByLabel('Thresholds(Temperature, Humidity, Time Exceed)');
     await this.thresholdsForm.fillThresholds(thresholds);
-    // await this.nextButton.nth(1).click();
-
     await this.stepper.goToStepByLabel('Segments');
-    await this.segmentsForm.fillSegment(segment);
+
+    // Fill total expected duration if needed
+    if (typeof totalExpectedDuration !== 'undefined') {
+      const totalDurationInput = this.page.getByRole('spinbutton', { name: 'Total Expected Duration' });
+      await totalDurationInput.fill(String(totalExpectedDuration));
+    }
+    if (typeof totalExpectedDurationUnit !== 'undefined') {
+      // Find the combobox for 'Unit' that is closest to the 'Total Expected Duration' spinbutton
+      const totalDurationInput = this.page.getByRole('spinbutton', { name: 'Total Expected Duration' });
+      const totalDurationUnitCombo = totalDurationInput.locator('xpath=following::input[@role="combobox" and @aria-label="Unit"]').first();
+      await totalDurationUnitCombo.fill(totalExpectedDurationUnit);
+    }
+
+    if (Array.isArray(segments)) {
+      for (const segment of segments) {
+        await this.segmentsForm.fillSegment(segment);
+        // If there is an add button, click it to add more segments
+        if (segments.length > 1 && this.segmentsForm.addButton) {
+          await this.segmentsForm.addButton.click();
+        }
+      }
+    }
     // Add save/cancel logic if needed
   }
 }

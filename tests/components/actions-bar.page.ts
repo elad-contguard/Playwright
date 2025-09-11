@@ -34,4 +34,12 @@ export class ActionsBar {
         throw new Error(`Unknown button: ${button}`);
     }
   }
+
+  async exportToExcelAndWaitForDownload() {
+    const [download] = await Promise.all([
+      this.page.waitForEvent('download'),
+      this.exportToExcelButton.click()
+    ]);
+    return download;
+  }
 }

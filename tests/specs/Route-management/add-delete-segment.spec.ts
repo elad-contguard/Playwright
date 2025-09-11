@@ -8,17 +8,31 @@ test('should add and delete a segment in route creation', async ({ authenticated
   const routeManagementGridPage = new RouteManagementGridPage(authenticatedPage);
   await routeManagementGridPage.startCreateRoute();
 
-  // Go to Segments section (assume stepper or tab navigation)
-  await routeManagementGridPage.page.getByRole('tab', { name: /Segments/i }).click();
+  // Go to Segments section
+  await authenticatedPage.waitForTimeout(500);
+  const segmentsTab = authenticatedPage.getByRole('tab', { name: /Segments/i });
+  await segmentsTab.waitFor({ state: 'visible' });
+  await segmentsTab.click();
 
-  // Add a segment
   const segmentsForm = routeManagementGridPage.getRouteEditor().segmentsForm;
+
+  // Initial counts
+  const initialHeaders = await segmentsForm.getSegmentHeadersCount();
+  const initialDeletes = await segmentsForm.getDeleteIconsCount();
+  expect(initialHeaders).toBeGreaterThanOrEqual(2);
+
+  // Add
   await segmentsForm.addSegment();
+  await authenticatedPage.waitForTimeout(800);
 
-  // Delete the newly added segment (assume it's the last one)
-  const count = await segmentsForm.segmentRows.count();
-  await segmentsForm.deleteSegment(count - 1);
+  // Verify counts after add
+  await expect(segmentsForm.getSegmentHeadersLocator()).toHaveCount(initialHeaders + 1, { timeout: 5000 });
+  await expect(segmentsForm.getDeleteIconsLocator()).toHaveCount(initialDeletes + 1, { timeout: 5000 });
 
-  // Wait for the segment count to update after deletion
-  await expect(segmentsForm.segmentRows).toHaveCount(2, { timeout: 10000 });
+  // Delete the last (new) segment
+  await segmentsForm.deleteLastSegment();
+
+  // Verify counts after delete
+  await expect(segmentsForm.getSegmentHeadersLocator()).toHaveCount(initialHeaders, { timeout: 5000 });
+  await expect(segmentsForm.getDeleteIconsLocator()).toHaveCount(initialDeletes, { timeout: 5000 });
 });
