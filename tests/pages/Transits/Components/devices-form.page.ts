@@ -9,9 +9,10 @@ export class DevicesForm {
 
   constructor(page: Page) {
     this.page = page;
-    this.heading = page.getByText(/Limited to 500 devices/);
-  this.addDeviceLabel = page.getByText('Add Device');
-  this.addDeviceTags = new TagsSelector(page, 'Add Device');
+    // Use data-testid attributes for robust locators
+    this.heading = page.locator('[data-testid="selected-devices"]');
+    this.addDeviceLabel = page.locator('[data-testid="add-device-label"]'); // If label exists, otherwise keep as is
+    this.addDeviceTags = new TagsSelector(page.locator('[data-testid="selected-devices"]'));
   }
 
 

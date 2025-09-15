@@ -1,7 +1,7 @@
 import { AgGridPage } from '../../components/ag-grid.page';
 import { DialogModal } from '../../components/dialog-modal.page';
 import { test } from '../../fixtures/auth.fixture';
-import { expect } from '@playwright/test';
+import { expect, Response } from '@playwright/test';
 import { TransitGridPage } from '../../pages/Transits/transit-grid.page';
 import { NavBarButton } from '../../components/nav-bar.page';
 import { ActionsBarButton } from '../../components/actions-bar.page';
@@ -86,10 +86,10 @@ test.describe('Transits Page', () => {
   // await expect(transitEditor.headerSaveButton).toBeEnabled();
   // // Save the transit
   // Intercept the save transit network request
-  const responsePromise = transitEditor.page.waitForResponse(response =>
-  response.url().includes('/api/transit-devices') &&
-  response.request().method() === 'POST'
-);
+  const responsePromise = transitEditor.page.waitForResponse((response: Response) =>
+    response.url().includes('/api/transit-devices') &&
+    response.request().method() === 'POST'
+  );
 
     await transitEditor.headerSaveButton.click();
     

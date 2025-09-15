@@ -21,12 +21,13 @@ export class TransitInfoForm {
   readonly actualArrival: DateTimePicker;
 
   constructor(page: Page) {
-  this.page = page;
-  this.senderAccount = new AutoComplete(page, 'Sender Account');
-  this.receiverAccount = new AutoComplete(page, 'Receiver Account');
-  this.status = new AutoComplete(page, 'Status');
-  this.actualPickup = new DateTimePicker(page, 'Actual Pickup');
-  this.actualArrival = new DateTimePicker(page, 'Actual Arrival');
+    this.page = page;
+    // Use data-testid attributes for robust locators
+    this.senderAccount = new AutoComplete(page.locator('[data-testid="sender-account"]'));
+    this.receiverAccount = new AutoComplete(page.locator('[data-testid="receiver-account"]'));
+    this.status = new AutoComplete(page.locator('[data-testid="status"]'));
+    this.actualPickup = new DateTimePicker(page.locator('[data-testid="actual-pickup"]'));
+    this.actualArrival = new DateTimePicker(page.locator('[data-testid="actual-arrival"]'));
   }
 
   async fillTransitInfo(params: {
@@ -56,8 +57,8 @@ export class TransitInfoForm {
     }
     // Fill any additional fields if needed
     for (const [key, value] of Object.entries(rest)) {
-      if (this[key] && typeof this[key].fill === 'function') {
-        await this[key].fill(value);
+      if ((this as any)[key] && typeof (this as any)[key].fill === 'function') {
+        await (this as any)[key].fill(value);
       }
     }
   }

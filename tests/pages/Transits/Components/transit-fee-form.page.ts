@@ -35,28 +35,23 @@ export class TransitFeeForm {
   readonly deviceFee: Locator;
   readonly total: Locator;
   readonly additionalChargesDescription: Locator;
-  readonly cancelButton: Locator;
-  readonly backButton: Locator;
-  readonly saveButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.heading = page.getByText(/Transit Fee/i);
-    this.transitType = new AutoComplete(page, 'Transit Type');
-    this.courier = new AutoComplete(page, 'Courier');
-    this.eta = new DateTimePicker(page, 'ETA');
-    this.trackingNumber = page.getByRole('textbox', { name: 'Tracking Number (AWB)' });
-    this.gonInvoiceNumber = page.getByRole('textbox', { name: 'GON Invoice Number' });
-    this.chargebackFee = page.getByRole('spinbutton', { name: 'Chargeback Fee' });
-    this.gonCost = page.getByRole('spinbutton', { name: 'GON Cost' });
-    this.additionalCharges = page.getByRole('spinbutton', { name: 'Additional Charges' });
-    this.estimatedCost = page.getByRole('spinbutton', { name: 'Estimated Cost' });
-    this.deviceFee = page.getByRole('spinbutton', { name: 'Device Fee' });
-    this.total = page.getByRole('spinbutton', { name: 'Total' });
-    this.additionalChargesDescription = page.getByRole('textbox', { name: 'Additional Charges Description' });
-    this.cancelButton = page.getByRole('button', { name: 'Cancel' });
-    this.backButton = page.getByRole('button', { name: 'Back' });
-    this.saveButton = page.getByRole('button', { name: 'Save' });
+    // Use data-testid attributes for robust locators
+    this.transitType = new AutoComplete(page.locator('[data-testid="transit-type"]'));
+    this.courier = new AutoComplete(page.locator('[data-testid="courier"]'));
+    this.eta = new DateTimePicker(page.locator('[data-testid="eta"]'));
+    this.trackingNumber = page.locator('[data-testid="tracking-number"]');
+    this.gonInvoiceNumber = page.locator('[data-testid="gon-invoice-number"]');
+    this.chargebackFee = page.locator('[data-testid="chargeback-fee"]');
+    this.gonCost = page.locator('[data-testid="gon-cost"]');
+    this.additionalCharges = page.locator('[data-testid="additional-charges"]');
+    this.estimatedCost = page.locator('[data-testid="estimated-cost"]');
+    this.deviceFee = page.locator('[data-testid="device-fee"]');
+    this.total = page.locator('[data-testid="total"]');
+    this.additionalChargesDescription = page.locator('[data-testid="additional-charges-description"]');
   }
 
   async fillTransitFee(params: {
@@ -100,8 +95,8 @@ export class TransitFeeForm {
     if (additionalChargesDescription) await this.additionalChargesDescription.fill(additionalChargesDescription);
     // Fill any additional fields if needed
     for (const [key, value] of Object.entries(rest)) {
-      if (this[key] && typeof this[key].fill === 'function') {
-        await this[key].fill(value);
+      if ((this as any)[key] && typeof (this as any)[key].fill === 'function') {
+        await (this as any)[key].fill(value);
       }
     }
   }

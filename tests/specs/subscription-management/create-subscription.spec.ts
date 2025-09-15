@@ -21,34 +21,37 @@ test.describe('Subscription Management', () => {
   });
 
   test('should create a device subscription', async ({ authenticatedPage }) => {
-    // No need to initialize the subscription editor page again
-    
-    // Create a subscription with all details at once
-    await subscriptionEditor.createSubscription(
-      // Subscription info
-      {
-        deviceOwner: 'Amazon ZAZ1',
-        // deviceOwner: '207 – Marine Containers, Ashdod (Mini GON)',  // Using exact value from dropdown with en dash
-        subscriptionType: SubscriptionType.DEVICE,  // Using correct value from dropdown
-        reference: 'TEST-REF-123',
-        customer: '3M Company',  // Using a customer that exists in the dropdown
-        status: SubscriptionStatus.IN_SUBSCRIPTION,
-        startDate: '09/07/2025',
-        endDate: '12/31/2025'
-      },
-      // Bulk operations
-      {
-        devicesToStart: ['1018300', '1018756'], 
-        startDate: '09/07/2025'
-      }
-    );
-    
-    // Verify success dialog appears
+    // Step 1: Navigate to create subscription
+    await subscriptionEditor.navigateToCreateSubscription();
+
+    // Step 2: Fill in the subscription info tab
+    await subscriptionEditor.subscriptionInfo.fillSubscriptionInfo({
+      deviceOwner: 'Amazon ZAZ1',
+      subscriptionType: SubscriptionType.DEVICE,
+      reference: 'TEST-REF-123',
+      customer: '3M Company',
+      status: SubscriptionStatus.IN_SUBSCRIPTION,
+      startDate: '09/07/2025',
+      endDate: '12/31/2025'
+    });
+
+    // Step 3: Go to Bulk Operations tab
+    await subscriptionEditor.clickNextInfo();
+
+    // Step 4: Select devices and set start date
+    await subscriptionEditor.bulkOperations.selectMultipleDevices(['1018300', '1018756']);
+    await subscriptionEditor.bulkOperations.setStartDate('09/07/2025');
+
+    // Step 5: Save and intercept network request
+    const response = await subscriptionEditor.saveAndIntercept();
+    expect(response.status()).toBe(200);
+
+    // Step 6: Verify success dialog appears
     await dialogModal.waitForVisible();
     const dialogTitle = await dialogModal.getTitle();
     await expect(dialogTitle).toContain('Success');
-    
-    // Confirm success dialog
+
+    // Step 7: Confirm success dialog
     await dialogModal.clickConfirm();
   });
 
@@ -73,16 +76,17 @@ test.describe('Subscription Management', () => {
     // Step 3: Fill geo locations in the Locations textarea
     await subscriptionEditor.bulkOperations.fillLocations('123123123, 456456456');
 
-    // Step 4: Save the subscription
-    await subscriptionEditor.save();
+  // Step 4: Save and intercept network request
+  const response = await subscriptionEditor.saveAndIntercept();
+  expect(response.status()).toBe(200);
 
-    // Step 5: Verify success dialog appears
-    await dialogModal.waitForVisible();
-    const dialogTitle = await dialogModal.getTitle();
-    await expect(dialogTitle).toContain('Success');
+  // Step 5: Verify success dialog appears
+  await dialogModal.waitForVisible();
+  const dialogTitle = await dialogModal.getTitle();
+  await expect(dialogTitle).toContain('Success');
 
-    // Step 6: Confirm success dialog
-    await dialogModal.clickConfirm();
+  // Step 6: Confirm success dialog
+  await dialogModal.clickConfirm();
 
     // Step 7: Assert the row exists in the grid with correct reference, locations, and customer using grid page object
     const reference = 'LOCATION-1231';
@@ -105,11 +109,11 @@ test.describe('Subscription Management', () => {
       headerNames.push((await headerCells.nth(colIdx).innerText()).trim());
     }
     for (let rowIdx = 0; rowIdx < rowCount - 1; rowIdx++) { // Exclude header
-      let rowData = {};
+      let rowData: Record<string, string> = {};
       for (let colIdx = 0; colIdx < colCount; colIdx++) {
         const header = headerNames[colIdx];
         const cell = await gridPage.grid.getCellByHeaderAndIndex(header, rowIdx);
-        rowData[header] = await cell.textContent();
+  rowData[header] = (await cell.textContent()) ?? '';
       }
       console.log(`Row ${rowIdx}:`, rowData);
     }

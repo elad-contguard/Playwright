@@ -4,12 +4,8 @@ import { NavBar } from '../../components/nav-bar.page';
 import { ActionsBar, ActionsBarButton } from '../../components/actions-bar.page';
 
 export class TransitGridPage {
-  /** Year selector combobox */
+  // Year selector combobox (Locator)
   readonly yearSelector: Locator;
-  /**
-   * Finds a cell by column header and transit ID value.
-   * Returns the cell Locator or throws if not found.
-   */
   readonly page: Page;
   readonly heading: Locator;
   readonly table: Locator;
@@ -28,7 +24,7 @@ export class TransitGridPage {
     this.table = page.getByRole('treegrid');
     this.rows = this.table.getByRole('row');
     this.pageSizeCombo = page.getByRole('combobox', { name: /Page Size/i });
-    this.yearSelector = page.getByRole('combobox', { name: /Select Year/i });
+    this.yearSelector = page.locator('[data-testid="select-year"]');
     this.nextPageButton = page.getByRole('button', { name: /Next Page/i });
     this.lastPageButton = page.getByRole('button', { name: /Last Page/i });
     this.navBar = new NavBar(page);
@@ -40,8 +36,13 @@ export class TransitGridPage {
 
   /** Select a year in the year selector combobox */
   async selectYear(year: string) {
-  await this.yearSelector.click();
-  await this.page.getByRole('option', { name: year }).click();
+    // Click the year selector combobox
+    await this.yearSelector.click();
+    // Select the year option by visible text
+    const option = this.page.getByRole('option', { name: year });
+    await option.click();
+    // Wait for grid to reload after selection
+    await this.grid.waitForGridToLoad();
   }
 
   async startCreateTransit() {
@@ -187,5 +188,6 @@ export class TransitGridPage {
     const targetRow = rows.nth(targetRowIndex);
     return targetRow.getByRole('gridcell').nth(targetColIndex);
   }
+  // Add more methods for filtering, row actions, etc. as needed
   // Add more methods for filtering, row actions, etc. as needed
 }
