@@ -188,6 +188,4 @@ export class TransitGridPage {
     const targetRow = rows.nth(targetRowIndex);
     return targetRow.getByRole('gridcell').nth(targetColIndex);
   }
-  // Add more methods for filtering, row actions, etc. as needed
-  // Add more methods for filtering, row actions, etc. as needed
 }

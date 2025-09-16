@@ -2,12 +2,12 @@ import { AgGridPage } from '../../components/ag-grid.page';
 import { DialogModal } from '../../components/dialog-modal.page';
 import { test } from '../../fixtures/auth.fixture';
 import { expect, Response } from '@playwright/test';
-import { TransitGridPage } from '../../pages/Transits/transit-grid.page';
+import { TransitGridPage } from '../../pages/transit-management/transit-grid.page';
 import { NavBarButton } from '../../components/nav-bar.page';
 import { ActionsBarButton } from '../../components/actions-bar.page';
-import { TransitType, Courier } from '../../pages/Transits/components/transit-fee-form.page';
+import { TransitType, Courier } from '../../pages/transit-management/components/transit-fee-form.page';
 // Import enums and types for the transit form if available
-import { TransitStatus} from '../../pages/Transits/components/transit-info.page';
+import { TransitStatus} from '../../pages/transit-management/components/transit-info.page';
 
 const POPUP_TITLE = /Error/i;
 const POPUP_MESSAGE = /Object reference not set to an instance of an object/i;
@@ -62,10 +62,7 @@ test.describe('Transits Page', () => {
         status: TransitStatus.InTransit,
         actualPickup: today.toISOString().slice(0, 10), // 'YYYY-MM-DD'
       };
-      // // Log all outgoing requests for debugging
-      // transitEditor.page.on('request', req => {
-      //   console.log('Request:', req.method(), req.url());
-      // });
+     
     const devices = ['1018698', '1018300']; // Example device names, update as needed
     const transitFee = {
       transitType: TransitType.Domestic,

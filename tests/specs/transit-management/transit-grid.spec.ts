@@ -1,6 +1,6 @@
 import { test } from '../../fixtures/auth.fixture';
 import { expect } from '@playwright/test';
-import { TransitGridPage } from '../../pages/Transits/transit-grid.page';
+import { TransitGridPage } from '../../pages/transit-management/transit-grid.page';
 import { NavBarButton } from '../../components/nav-bar.page';
 import { ActionsBarButton } from '../../components/actions-bar.page';
 
