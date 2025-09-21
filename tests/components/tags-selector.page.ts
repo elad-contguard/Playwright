@@ -15,7 +15,7 @@ export class TagsSelector {
       await this.input.fill(tag);
       await this.input.press('ArrowDown');
       // Wait for dropdown options to appear
-      await this.dropdownOptions.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+      await this.dropdownOptions.first().waitFor({ state: 'visible', timeout: 1000 }).catch(() => {});
       const optionsCount = await this.dropdownOptions.count();
       if (optionsCount > 0) {
         await this.dropdownOptions.first().click().catch(async () => {
