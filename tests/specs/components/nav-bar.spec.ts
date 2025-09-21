@@ -1,6 +1,6 @@
-import { test } from '../fixtures/auth.fixture';
+import { test } from '../../fixtures/auth.fixture';
 import { expect } from '@playwright/test';
-import { NavBar, NavBarButton } from '../components/nav-bar.page';
+import { NavBar, NavBarButton } from '../../components/nav-bar.page';
 
 test.describe('NavBar', () => {
   let navBar: NavBar;

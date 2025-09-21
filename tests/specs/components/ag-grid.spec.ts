@@ -1,6 +1,6 @@
-import { test } from '../fixtures/auth.fixture';
+import { test } from '../../fixtures/auth.fixture';
 import { expect } from '@playwright/test';
-import { AgGridPage } from '../components/ag-grid.page';
+import { AgGridPage } from '../../components/ag-grid.page';
 
 // Example test spec for AgGridComponent
 
