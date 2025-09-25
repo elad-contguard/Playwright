@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { DialogModal } from './dialog-modal.page';
 
 export enum NavBarButton {
   RouteTemplates = 'RouteTemplates',
@@ -28,24 +29,20 @@ export class NavBar {
   readonly rolesButton: Locator;
   readonly generateUUIDButton: Locator;
   readonly userProfileButton: Locator;
-  readonly logoutYesButton: Locator;
-  readonly logoutNoButton: Locator;
 
   constructor(page: Page) {
-    this.page = page;
-    this.routeTemplatesButton = page.getByRole('button', { name: /Route Templates/i });
-    this.devicesButton = page.getByRole('button', { name: 'Devices', exact: true });
-    this.shipmentsButton = page.getByRole('button', { name: /Shipments/i });
-    this.transitsButton = page.getByRole('button', { name: /Transits/i });
-    this.subscriptionsButton = page.getByRole('button', { name: /Subscriptions/i });
-    this.locationsButton = page.getByRole('button', { name: /Locations/i });
-    this.subDevicesButton = page.getByRole('button', { name: /Sub Devices/i });
-    this.accountsButton = page.getByRole('button', { name: /Accounts/i });
-    this.rolesButton = page.getByRole('button', { name: /Roles/i });
-    this.generateUUIDButton = page.getByRole('button', { name: /Generate UUID/i });
-    this.userProfileButton = page.getByRole('button', { name: /Hello, /i });
-    this.logoutYesButton = page.getByRole('button', { name: 'Yes', exact: true });
-    this.logoutNoButton = page.getByRole('button', { name: 'No', exact: true });
+  this.page = page;
+  this.routeTemplatesButton = page.locator('[data-testid="nav-route-templates"]');
+  this.devicesButton = page.locator('[data-testid="nav-devices"]');
+  this.shipmentsButton = page.locator('[data-testid="nav-shipments"]');
+  this.transitsButton = page.locator('[data-testid="nav-transits"]');
+  this.subscriptionsButton = page.locator('[data-testid="nav-subscriptions"]');
+  this.locationsButton = page.locator('[data-testid="nav-locations"]');
+  this.subDevicesButton = page.locator('[data-testid="nav-sub-devices"]');
+  this.accountsButton = page.locator('[data-testid="nav-accounts"]');
+  this.rolesButton = page.locator('[data-testid="nav-roles"]');
+  this.generateUUIDButton = page.locator('[data-testid="nav-generate-uuid"]');
+  this.userProfileButton = page.locator('[data-testid="nav-logout"]');
   }
 
   async navigateTo(button: NavBarButton) {
@@ -99,8 +96,10 @@ export class NavBar {
   }
 
   async logout() {
-    await this.userProfileButton.click();
-    // Wait for the logout dialog and click 'Yes'
-    await this.logoutYesButton.click();
+  await this.userProfileButton.click();
+  // Wait for the logout dialog and confirm logout using DialogModal
+  const dialog = new DialogModal(this.page);
+  await dialog.waitForVisible();
+  await dialog.clickConfirm();
   }
 }

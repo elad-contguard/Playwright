@@ -10,16 +10,13 @@ export class DialogModal {
   readonly confirmButton: Locator;
 
   constructor(page: Page) {
-    this.page = page;
-    this.container = page.getByRole('dialog');
-    // More general locator for the heading/title inside the dialog
-    this.title = this.container.locator('.dialog-title, [role="heading"], h1, h2, h3').filter({ hasText: /.+/ });
-    // Use the .dialog-message class for the message inside the dialog
-    this.message = this.container.locator('.dialog-message');
-    this.okButton = this.container.getByRole('button', { name: /OK/i }).first();
-    // Add additional common dialog buttons
-    this.confirmButton = this.container.getByRole('button', { name: /Confirm|OK|Yes|Save/i }).first();
-    this.cancelButton = this.container.getByRole('button', { name: /Cancel|No|Close/i }).first();
+  this.page = page;
+  this.container = page.getByRole('dialog');
+  this.title = this.container.locator('[data-testid="dialog-title"]');
+  this.message = this.container.locator('[data-testid="dialog-message"]');
+  this.okButton = this.container.locator('[data-testid="dialog-ok"]');
+  this.confirmButton = this.container.locator('[data-testid="dialog-confirm"]');
+  this.cancelButton = this.container.locator('[data-testid="dialog-cancel"]');
   }
 
   /**

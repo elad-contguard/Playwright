@@ -47,7 +47,6 @@ export class TransitGridPage {
 
   async startCreateTransit() {
     await this.actionsBar.clickButton(ActionsBarButton.CreateNew);
-    // Add logic to handle the transit creation dialog/form
   }
 
   async clearFilters() {
@@ -153,19 +152,6 @@ export class TransitGridPage {
     // Assumes the transit creation dialog is open and visible
     const { TransitEditor } = require('./transit-editor.page');
     return new TransitEditor(this.page);
-  }
-
-  async saveTransit() {
-    // Assumes the Save button is visible in the transit creation dialog
-    // Click the first enabled Save button
-    const saveButtons = await this.page.locator('button', { hasText: 'Save' }).filter({ has: this.page.locator(':not([disabled])') });
-    const count = await saveButtons.count();
-    if (count > 0) {
-      await saveButtons.nth(0).click();
-    } else {
-      // Fallback: click the first Save button (even if disabled)
-      await this.page.getByRole('button', { name: /Save/i }).first().click();
-    }
   }
 
   async getCellByHeaderAndTransitId(header: string, transitId: string): Promise<Locator> {

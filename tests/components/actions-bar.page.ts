@@ -14,9 +14,9 @@ export class ActionsBar {
 
   constructor(page: Page) {
     this.page = page;
-    this.clearFiltersButton = page.getByRole('button', { name: /Clear Filters/i });
-    this.exportToExcelButton = page.getByRole('button', { name: /Export to Excel/i });
-    this.createNewButton = page.getByRole('button', { name: /Create New/i });
+    this.clearFiltersButton = page.locator('[data-testid="clear-filters"]');
+    this.exportToExcelButton = page.locator('[data-testid="export-to-excel"]');
+    this.createNewButton = page.locator('[data-testid="create-new"]');
   }
 
   async clickButton(button: ActionsBarButton) {

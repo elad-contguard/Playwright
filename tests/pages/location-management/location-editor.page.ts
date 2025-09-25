@@ -56,7 +56,7 @@ export class LocationEditor {
     startDate,
     endDate,
     reference,
-    notes
+    locationName
   }: {
     name: string;
     ref?: string;
@@ -65,7 +65,7 @@ export class LocationEditor {
     startDate?: string;
     endDate?: string;
     reference?: string;
-    notes?: string;
+    locationName?: string;
   }) {
     // Fill the location name and ref fields
     await this.locationNameInput.fill(name);
@@ -80,8 +80,8 @@ export class LocationEditor {
       status,
       startDate,
       endDate,
-      reference,
-      notes
+      reference
+      // locationName is not used in fillSubscriptionInfo, but included in signature for compatibility
     });
   }
 

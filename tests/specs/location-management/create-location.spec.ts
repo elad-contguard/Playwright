@@ -29,13 +29,20 @@ test.describe('Location Management - Create Location', () => {
   });
 
   test('should open create location dialog', async () => {
-    await locationGridPage.startCreateLocation();
-    const locationEditor = locationGridPage.getLocationEditor();
-    await expect(locationEditor.heading).toBeVisible();
-    await expect(locationEditor.locationNameInput).toBeVisible();
-    await expect(locationEditor.locationRefInput).toBeVisible();
-    await expect(locationEditor.saveButton).toBeVisible();
-    await expect(locationEditor.cancelButton).toBeVisible();
+  await locationGridPage.startCreateLocation();
+  const locationEditor = locationGridPage.getLocationEditor();
+  await expect(locationEditor.heading).toBeVisible();
+  // Use SubscriptionLocationInfo page object for field locators
+  const subscriptionInfo = locationEditor.subscriptionLocationInfo;
+  await expect(subscriptionInfo.locationNameInput).toBeVisible();
+  await expect(subscriptionInfo.referenceInput).toBeVisible();
+  await expect(subscriptionInfo.statusDropdown.input).toBeVisible();
+  await expect(subscriptionInfo.startDatePicker.input).toBeVisible();
+  await expect(subscriptionInfo.endDatePicker.input).toBeVisible();
+  await expect(subscriptionInfo.subscriptionIdDropdown.input).toBeVisible();
+  await expect(locationEditor.saveButton).toBeVisible();
+  // The dialog has a 'Back' button instead of 'Cancel'
+  await expect(locationEditor.nextButton).toBeVisible();
   });
 
   test('should create a new location (full flow)', async () => {
@@ -70,8 +77,7 @@ test.describe('Location Management - Create Location', () => {
       status: LocationStatus.IN_SUBSCRIPTION,
       startDate,
       endDate: endDateStr,
-      reference: 'Test Reference',
-      notes: 'Created via automated test'
+      reference: 'Test Reference'
     };
 
     // Fill the location form with the test data
@@ -85,7 +91,7 @@ test.describe('Location Management - Create Location', () => {
     await expect(locationEditor.saveButton).toBeEnabled();
 
     // Intercept the save location network request
-    const responsePromise = locationEditor.page.waitForResponse(response =>
+    const responsePromise = locationEditor.page.waitForResponse((response: import('@playwright/test').Response) =>
       (response.url().includes('/api/locations') || response.url().includes('/api/subscription-locations')) &&
       (response.request().method() === 'POST' || response.request().method() === 'PUT')
     );

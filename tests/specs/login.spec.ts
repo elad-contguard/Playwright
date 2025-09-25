@@ -103,4 +103,27 @@ test.describe('Login Page', () => {
     
     await expect(page.getByText(ERROR_MESSAGES.LOGIN_FAILED)).toBeVisible();
   });
+  test('should toggle password visibility', async ({ page }) => {
+    // Password should be hidden by default
+    expect(await loginPage.isPasswordHidden()).toBe(true);
+    // Toggle visibility
+    await loginPage.togglePasswordVisibility();
+    expect(await loginPage.isPasswordVisible()).toBe(true);
+    // Toggle again to hide
+    await loginPage.togglePasswordVisibility();
+    expect(await loginPage.isPasswordHidden()).toBe(true);
+  });
+
+  test('should allow typing password when visible and hidden', async ({ page }) => {
+    // Password hidden by default
+    await loginPage.passwordInput.fill('hiddenPassword');
+    expect(await loginPage.passwordInput.inputValue()).toBe('hiddenPassword');
+    // Toggle to visible
+    await loginPage.togglePasswordVisibility();
+    await loginPage.passwordInput.fill('visiblePassword');
+    expect(await loginPage.passwordInput.inputValue()).toBe('visiblePassword');
+    // Toggle back to hidden
+    await loginPage.togglePasswordVisibility();
+    expect(await loginPage.isPasswordHidden()).toBe(true);
+  });
 });
