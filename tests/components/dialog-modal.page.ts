@@ -13,7 +13,7 @@ export class DialogModal {
   this.page = page;
   this.container = page.getByRole('dialog');
   this.title = this.container.locator('[data-testid="dialog-title"]');
-  this.message = this.container.locator('[data-testid="dialog-message"]');
+  this.message = this.container.locator('[data-testid="dialog-content"]');
   this.okButton = this.container.locator('[data-testid="dialog-ok"]');
   this.confirmButton = this.container.locator('[data-testid="dialog-confirm"]');
   this.cancelButton = this.container.locator('[data-testid="dialog-cancel"]');

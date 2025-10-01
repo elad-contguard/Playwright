@@ -19,30 +19,50 @@ export enum LocationStatus {
  * Provides methods to interact with location creation/editing functionality
  */
 export class LocationEditor {
+  readonly backActionHeaderButton: Locator;
+  readonly saveActionHeaderButton: Locator;
+  readonly backInfoButton: Locator;
+  readonly nextInfoButton: Locator;
   readonly page: Page;
   readonly heading: Locator;
   readonly locationNameInput: Locator;
   readonly locationRefInput: Locator;
-  readonly saveButton: Locator;
-  readonly cancelButton: Locator;
-  readonly nextButton: Locator;
   readonly subscriptionLocationInfo: SubscriptionLocationInfo;
   readonly bulkOperationsTab: Locator;
   readonly deviceSubscriptionOperations: DeviceSubscriptionOperations;
+  readonly updateActionHeaderButton: Locator;
+  readonly updateBulkButton: Locator;
+  readonly saveBulkButton: Locator;
+  readonly prevBulkButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.heading = page.getByRole('heading', { name: /New Subscription Location|Edit Location/i });
-    this.locationNameInput = page.getByRole('textbox', { name: /Location Name/i });
-    this.locationRefInput = page.getByRole('textbox', { name: /Location Ref/i });
-    this.saveButton = page.getByRole('button', { name: /Save/i }).first();
-    this.cancelButton = page.getByRole('button', { name: /Cancel/i }).first();
-    this.nextButton = page.getByRole('button', { name: /Next/i }).first();
-    this.bulkOperationsTab = page.getByRole('tab', { name: /Bulk Operations/i });
-    
-    // Initialize page components
-    this.subscriptionLocationInfo = new SubscriptionLocationInfo(page);
-    this.deviceSubscriptionOperations = new DeviceSubscriptionOperations(page);
+  // Action header Back button
+  this.backActionHeaderButton = page.locator('[data-testid="back-action-header"]');
+  // Save button (action header)
+  this.saveActionHeaderButton = page.locator('[data-testid="save-action-header"]');
+  // Back button (info step)
+  this.backInfoButton = page.locator('[data-testid="back-info"]');
+  // Next button (info step)
+  this.nextInfoButton = page.locator('[data-testid="next-info"]');
+  // Heading
+  this.heading = page.locator('.subscription-location-editor-container cgrd-action-header');
+  // Inputs
+  this.locationNameInput = page.getByRole('textbox', { name: /Location Name/i });
+  this.locationRefInput = page.getByRole('textbox', { name: /Location Ref/i });
+  // Bulk Operations tab
+  this.bulkOperationsTab = page.getByRole('tab', { name: /Bulk Operations/i });
+  // Initialize page components
+  this.subscriptionLocationInfo = new SubscriptionLocationInfo(page);
+  this.deviceSubscriptionOperations = new DeviceSubscriptionOperations(page);
+  // Update button (action header)
+  this.updateActionHeaderButton = page.locator('[data-testid="update-action-header"]');
+  // Update button (bulk operations step)
+  this.updateBulkButton = page.locator('[data-testid="update-bulk"]');
+  // Save button (bulk operations step)
+  this.saveBulkButton = page.locator('[data-testid="save-bulk"]');
+  // Previous button (bulk operations step)
+  this.prevBulkButton = page.locator('[data-testid="back-bulk-stepper"]');
   }
 
   /**
@@ -55,8 +75,7 @@ export class LocationEditor {
     status = LocationStatus.IN_SUBSCRIPTION,
     startDate,
     endDate,
-    reference,
-    locationName
+    reference
   }: {
     name: string;
     ref?: string;
@@ -65,23 +84,19 @@ export class LocationEditor {
     startDate?: string;
     endDate?: string;
     reference?: string;
-    locationName?: string;
   }) {
-    // Fill the location name and ref fields
-    await this.locationNameInput.fill(name);
-    
+    // Fill the location ref field directly
     if (ref) {
       await this.locationRefInput.fill(ref);
     }
-    
-    // Use the SubscriptionLocationInfo component to fill subscription-related fields
+    // Fill subscription-related fields, including locationName, using the SubscriptionLocationInfo component
     await this.subscriptionLocationInfo.fillSubscriptionInfo({
       subscriptionId,
       status,
       startDate,
       endDate,
+      name,
       reference
-      // locationName is not used in fillSubscriptionInfo, but included in signature for compatibility
     });
   }
 
@@ -91,7 +106,7 @@ export class LocationEditor {
    * @returns The dialog modal if expectSuccessDialog is true, otherwise undefined
    */
   async save(expectSuccessDialog: boolean = true): Promise<DialogModal | undefined> {
-    await this.saveButton.click();
+  await this.saveActionHeaderButton.click();
     
     if (expectSuccessDialog) {
       // Create a dialog modal instance to handle the success popup
@@ -116,14 +131,21 @@ export class LocationEditor {
    * Moves to the next tab (clicks the Next button)
    */
   async next() {
-    await this.nextButton.click();
+  await this.nextInfoButton.click();
   }
 
   /**
    * Cancels the location editing (clicks the Cancel button)
    */
   async cancel() {
-    await this.cancelButton.click();
+  await this.backInfoButton.click();
+  }
+
+  /**
+   * Clicks the Back button in the dialog (used instead of Cancel)
+   */
+  async back() {
+  await this.backActionHeaderButton.click();
   }
   
   /**

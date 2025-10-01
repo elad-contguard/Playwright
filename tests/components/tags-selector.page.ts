@@ -1,13 +1,26 @@
-import { Locator } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 
 export class TagsSelector {
+  readonly parent: Page | Locator;
   readonly input: Locator;
-  readonly dropdownOptions: Locator;
+  readonly chipGrid: Locator;
+  readonly chipRow: Locator;
+  readonly chipRemove: Locator;
+  readonly copyButton: Locator;
+  readonly autocomplete: Locator;
+  readonly autocompleteOptions: Locator;
+  readonly autocompleteOptionDescription: Locator;
 
-  constructor(parent: Locator) {
-    // Always use the combobox input and options inside the parent
-    this.input = parent.locator('[role="combobox"]').first();
-    this.dropdownOptions = parent.locator('[role="listbox"] [role="option"]');
+  constructor(parent: Page | Locator) {
+    this.parent = parent;
+    this.input = parent.locator('[data-testid="tags-selector-input"]');
+    this.chipGrid = parent.locator('[data-testid="tags-chip-grid"]');
+    this.chipRow = parent.locator('[data-testid="tags-chip-row"]');
+    this.chipRemove = parent.locator('[data-testid="tags-chip-remove"]');
+    this.copyButton = parent.locator('[data-testid="tags-copy"]');
+    this.autocomplete = parent.locator('[data-testid="tags-autocomplete"]');
+    this.autocompleteOptions = parent.locator('[data-testid="tags-autocomplete-option"]');
+    this.autocompleteOptionDescription = parent.locator('[data-testid="tags-autocomplete-option-description"]');
   }
 
   async selectTags(tags: string[]) {
@@ -15,10 +28,10 @@ export class TagsSelector {
       await this.input.fill(tag);
       await this.input.press('ArrowDown');
       // Wait for dropdown options to appear
-      await this.dropdownOptions.first().waitFor({ state: 'visible', timeout: 1000 }).catch(() => {});
-      const optionsCount = await this.dropdownOptions.count();
+      await this.autocompleteOptions.first().waitFor({ state: 'visible', timeout: 1000 }).catch(() => {});
+      const optionsCount = await this.autocompleteOptions.count();
       if (optionsCount > 0) {
-        await this.dropdownOptions.first().click().catch(async () => {
+        await this.autocompleteOptions.first().click().catch(async () => {
           await this.input.press('Enter');
         });
       } else {

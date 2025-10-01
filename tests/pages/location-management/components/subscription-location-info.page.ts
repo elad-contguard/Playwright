@@ -8,6 +8,7 @@ import { LocationStatus } from '../location-editor.page';
  * Handles interactions with subscription-related fields for locations
  */
 export class SubscriptionLocationInfo {
+ 
   readonly page: Page;
   readonly statusDropdown: AutoComplete;
   readonly startDatePicker: DateTimePicker;
@@ -60,6 +61,14 @@ export class SubscriptionLocationInfo {
     await this.subscriptionIdDropdown.selectText(id);
   }
 
+ /**
+   * Sets the location name
+   * @param locationName Location name to set
+   */
+  async setName(locationName: string) {
+    await this.locationNameInput.fill(locationName);
+  }
+
   /**
    * Sets the reference text
    * @param reference Reference text to set
@@ -69,25 +78,28 @@ export class SubscriptionLocationInfo {
   }
 
   /**
-   * Fills all subscription information at once
+   * Fills all subscription information at once, including location name
    */
   async fillSubscriptionInfo({
+    subscriptionId,
     status,
     startDate,
     endDate,
-    subscriptionId,
+    name,
     reference
   }: {
+    subscriptionId?: string;
     status?: LocationStatus;
     startDate?: string;
     endDate?: string;
-    subscriptionId?: string;
+    name?: string;
     reference?: string;
   }) {
+    if (subscriptionId) await this.setSubscriptionId(subscriptionId);
     if (status) await this.setStatus(status);
     if (startDate) await this.setStartDate(startDate);
     if (endDate) await this.setEndDate(endDate);
-    if (subscriptionId) await this.setSubscriptionId(subscriptionId);
+    if (name) await this.setName(name);
     if (reference) await this.setReference(reference);
   }
 }

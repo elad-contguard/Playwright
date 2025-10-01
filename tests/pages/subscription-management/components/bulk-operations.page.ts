@@ -31,7 +31,7 @@ export class BulkOperations {
   this.selectedDevicesCounter = page.locator('text=/selected devices:/i');
 
     // End Subscription for Devices section
-    this.endSubscriptionDevicesSelector = new TagsSelector(page.locator('[data-testid="end-subscription-devices"]'));
+  this.endSubscriptionDevicesSelector = new TagsSelector(page.locator('[data-testid="end-subscription-devices"]'));
     this.endDatePicker = new DateTimePicker(page.locator('[data-testid="end-subscription-date"]'));
 
   // Location Subscription Type
